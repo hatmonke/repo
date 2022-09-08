@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <%- 
+    include('./component/meta', {
+      appTitle: appTitle, 
+      appDescription: appDescription, 
+      ogTitle: ogTitle, 
+      ogDescription: ogDescription, 
+      ogUrl: ogUrl, 
+      ogImage: ogImage
+    }); 
+    -%>
+  </head>
+  <body class="d-flex text-white bg-dark" style="min-height: 100%;">
+    
+    <div class="container d-flex w-100 p-3 mx-auto flex-column" style="min-height: 100%; max-width: 72em;">
+      <%- include('./component/header'); -%>
+      <main class="px-3" style="min-height: 100%;">
+        <div style="max-width: 42rem; margin-top: 5rem; margin-left: auto; margin-right: auto;">
+          <div class="row">
+            <% if (!_.isEmpty(rat)) { %>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-12 mb-2" style="padding-left: 30px; padding-right: 30px;">
+              <div>
+                <h3 class="rat-rank">Rank #<%= rat.rarity_rank %></h3>
+                <% if (content_image_is_video) { %>
+                <video class="rat-avatar" style="<% if (content_image_frame=='rectangle') { %> border-radius: 10px; <% } %>" src="<%= rat.image.replace('ipfs://', 'https://ipfs.io/ipfs/'); %>" alt="<%= rat.name %>" /></video>
+                <% } else { %>
+                <img class="rat-avatar" style="<% if (content_image_frame=='rectangle') { %> border-radius: 10px; <% } %>" src="<%= rat.image.replace('ipfs://', 'https://ipfs.io/ipfs/'); %>" alt="<%= rat.name %>" />
+                <% } %>
+                <div class="rat-info text-center mt-4">
+                  <span><%= rat.name %></span>
+                </div>
+              </div>
+              <div class="mt-3 mb-3">
+                <!--
+                <div class="rat-description dont-break-out">
+                  <%- md.render(rat.description) %>
+                </div>
+                -->
+                <% if (!_.isEmpty(collection_contract_address)) { %>
+                <a class="view-on-link" href="https://tofunft.com/nft/bsc/<%= collection_contract_address %>/<%= rat.id %>" target="_blank">
+                  <div class="view-on-block text-center">
+                    <img class="view-on-icon" src="/images/opensea.svg">
+                    View on TofuNFT
+                  </div>
+                </a>
+                <% } %>
+                <% if (!_.isEmpty(rat.external_url)) { %>
+                <a class="view-on-link" href="<%= rat.external_url %>" target="_blank">
+                  <div class="view-on-block text-center">
+                    <img class="view-on-icon" src="/images/profile@32w.png">
+                    View on Official Site
+                  </div>
+                </a>
+                <% } %>
+                <%
+                let jsonUrl = rat.id+'/json';
+                if (trait_normalization == 1) {
+                  jsonUrl = jsonUrl+'?trait_normalization=1';
+                }
+                let similarUrl = rat.id+'/similar';
+                if (trait_normalization == 1) {
+                  similarUrl = similarUrl+'?trait_normalization=1';
+                }
+                %>
+                <div class="row">
+                  <div class="col-6" style="padding-right: 5px;">
+                    <a class="view-on-link" href="/<%= item_path_name %>/<%= jsonUrl %>" target="_blank">
+                      <div class="view-on-block text-center">
+                        JSON
+                      </div>
+                    </a>
+                  </div>
+                  <div class="col-6" style="padding-left: 5px;">
+                    <a class="view-on-link" href="/<%= item_path_name %>/<%= similarUrl %>">
+                      <div class="view-on-block text-center">
+                        Similar
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-12 mb-2" >
+              <div class="rarity-score-block">
+                <h4 class="text-center">Rarity Score</h4>
+                <div class="rarity-score-sum">
+                    <%= ratScore.rarity_sum.toFixed(2) %>
+                </div>
+              </div>
+              <% allTraitTypes.forEach(function(traitType) { %>
+                <div class="mt-4">
+                  <div class="row">
+                    <div class="col-6">
+                      <h3 class="trait-type"><%= traitType.trait_type %></h3>
+                    </div>
+                    <div class="col-6 trait-type-rarity">
+                      +<%= ratScore['trait_type_'+traitType.id+'_rarity'].toFixed(2) %>
+                    </div>
+                  </div>
+                  <div class="d-flex trait-value-block">
+                    <div class="flex-grow-1 trait-value">
+                      <% if (ratTraitData.hasOwnProperty(traitType.id)) { %>
+                        <%
+                        if (traitType.trait_data_type == 'date') {
+                          let date = new Date((ratTraitData[traitType.id]-29)*1000);
+                          %>
+                          <%= date.toLocaleString("en-US") %>
+                          <%
+                        } else {
+                          %>
+                          <%= ratTraitData[traitType.id] %>
+                          <%
+                        }
+                        %>
+                      <% } else { %>
+                        None (Missing Trait)
+                      <% } %>
+                    </div>
+                    <div class="trait-value-count">
+                      <% if (ratTraitData.hasOwnProperty(traitType.id)) { %>
+                        <%= allDetailTraitTypesData[traitType.id+'|||'+ratTraitData[traitType.id]] %>
+                      <% } else { %>
+                        <%= (totalratCount-traitType.rat_count) %>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+              <div class="mt-4">
+                <div class="row">
+                  <div class="col-6">
+                    <h3 class="trait-type">Attribute Count</h3>
+                  </div>
+                  <div class="col-6 trait-type-rarity">
+                    +<%= ratScore['trait_count_rarity'].toFixed(2) %>
+                  </div>
+                </div>
+                <div class="d-flex trait-value-block">
+                  <div class="flex-grow-1 trait-value">
+                    <%= Object.keys(ignoredratTraitData).length %>
+                  </div>
+                  <div class="trait-value-count">
+                    <%= allTraitCountTypesData[Object.keys(ignoredratTraitData).length] %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } else { %>
+              <h1 class="text-center">
+                There's no result.
+              </h1>
+            <% } %>
+          </div>
+        </div>
+      </main>
+      <%- include('./component/footer'); -%>
+    </div>
+  </body>
+</html>

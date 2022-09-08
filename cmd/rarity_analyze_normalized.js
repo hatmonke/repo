@@ -20,9 +20,9 @@ if (!fs.existsSync(databasePath)) {
 const db = new Database(databasePath);
 
 if (mode != 'force') {
-    let checkTable = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='normalized_punk_scores'").get();
+    let checkTable = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='normalized_rat_scores'").get();
     if (checkTable) {
-        if (checkTable.name == 'normalized_punk_scores') {
+        if (checkTable.name == 'normalized_rat_scores') {
             console.log("Database exist.");
             return;
         }
@@ -30,11 +30,11 @@ if (mode != 'force') {
 }
 
 let allTraitTypes = db.prepare('SELECT trait_types.* FROM trait_types').all();
-let allTraitTypeCount = db.prepare('SELECT trait_type_id, COUNT(trait_type_id) as trait_type_count, SUM(punk_count) trait_type_sum FROM trait_detail_types GROUP BY trait_type_id').all();
-let traitCountNum = db.prepare('SELECT COUNT(*) as trait_count_num FROM punk_trait_counts').get().trait_count_num;
-let traitCounts = db.prepare('SELECT * FROM punk_trait_counts').all();
-let totalSupply = db.prepare('SELECT COUNT(punks.id) as punk_total FROM punks').get().punk_total;
-let allTraits = db.prepare('SELECT trait_types.trait_type, trait_detail_types.trait_detail_type, trait_detail_types.punk_count, trait_detail_types.trait_type_id, trait_detail_types.id trait_detail_type_id  FROM trait_detail_types INNER JOIN trait_types ON (trait_detail_types.trait_type_id = trait_types.id) ORDER BY trait_types.trait_type, trait_detail_types.trait_detail_type').all();
+let allTraitTypeCount = db.prepare('SELECT trait_type_id, COUNT(trait_type_id) as trait_type_count, SUM(rat_count) trait_type_sum FROM trait_detail_types GROUP BY trait_type_id').all();
+let traitCountNum = db.prepare('SELECT COUNT(*) as trait_count_num FROM rat_trait_counts').get().trait_count_num;
+let traitCounts = db.prepare('SELECT * FROM rat_trait_counts').all();
+let totalSupply = db.prepare('SELECT COUNT(rats.id) as rat_total FROM rats').get().rat_total;
+let allTraits = db.prepare('SELECT trait_types.trait_type, trait_detail_types.trait_detail_type, trait_detail_types.rat_count, trait_detail_types.trait_type_id, trait_detail_types.id trait_detail_type_id  FROM trait_detail_types INNER JOIN trait_types ON (trait_detail_types.trait_type_id = trait_types.id) ORDER BY trait_types.trait_type, trait_detail_types.trait_detail_type').all();
 
 let traitTypeCountSum = 0 + traitCountNum;
 let traitTypeNum = 0 + 1;
@@ -69,12 +69,12 @@ let meanValueCount = traitTypeCountSum/traitTypeNum;
 
 allTraits.forEach(detailTrait => {
     traitTypeRarityScoreSum[detailTrait.trait_type_id] = traitTypeRarityScoreSum[detailTrait.trait_type_id] +
-        totalSupply/detailTrait.punk_count;
+        totalSupply/detailTrait.rat_count;
 });
 traitTypeRarityScoreSum[allTraitTypes.length] = 0;
 traitCounts.forEach(traitCount => {
     traitTypeRarityScoreSum[allTraitTypes.length] = traitTypeRarityScoreSum[allTraitTypes.length] + 
-        totalSupply/traitCount.punk_count;
+        totalSupply/traitCount.rat_count;
 }); 
 
 let traitTypeMeanRarity = [];
@@ -93,30 +93,30 @@ console.log(meanValueCount);
 console.log(traitTypeMeanRarity);
 console.log(meanRarity);
 
-let createScoreTableStmt = "CREATE TABLE normalized_punk_scores ( id INT, punk_id INT, ";
-let insertPunkScoreStmt = "INSERT INTO normalized_punk_scores VALUES (:id, :punk_id, ";
+let createScoreTableStmt = "CREATE TABLE normalized_rat_scores ( id INT, rat_id INT, ";
+let insertratScoreStmt = "INSERT INTO normalized_rat_scores VALUES (:id, :rat_id, ";
 
 allTraitTypes.forEach(traitType => {
     createScoreTableStmt = createScoreTableStmt + "trait_type_" + traitType.id + "_percentile DOUBLE, trait_type_" + traitType.id + "_rarity DOUBLE, trait_type_" + traitType.id + "_value TEXT, ";
-    insertPunkScoreStmt = insertPunkScoreStmt + ":trait_type_" + traitType.id + "_percentile, :trait_type_" + traitType.id + "_rarity, :trait_type_" + traitType.id + "_value, ";
+    insertratScoreStmt = insertratScoreStmt + ":trait_type_" + traitType.id + "_percentile, :trait_type_" + traitType.id + "_rarity, :trait_type_" + traitType.id + "_value, ";
 });
 
 createScoreTableStmt = createScoreTableStmt + "trait_count INT,  trait_count_percentile DOUBLE, trait_count_rarity DOUBLE, rarity_sum DOUBLE, rarity_rank INT)";
-insertPunkScoreStmt = insertPunkScoreStmt + ":trait_count,  :trait_count_percentile, :trait_count_rarity, :rarity_sum, :rarity_rank)";
+insertratScoreStmt = insertratScoreStmt + ":trait_count,  :trait_count_percentile, :trait_count_rarity, :rarity_sum, :rarity_rank)";
 
 db.exec(createScoreTableStmt);
-insertPunkScoreStmt = db.prepare(insertPunkScoreStmt);
+insertratScoreStmt = db.prepare(insertratScoreStmt);
 
-let punkScores = db.prepare('SELECT * FROM punk_scores').all();
+let ratScores = db.prepare('SELECT * FROM rat_scores').all();
 
-punkScores.forEach(punkScore => {
+ratScores.forEach(ratScore => {
 
-    console.log("Normalize punk: #" + punkScore.id);
+    console.log("Normalize rat: #" + ratScore.id);
 
     let raritySum = 0;
-    let normalizedPunkScore = {};
-    normalizedPunkScore['id'] = punkScore.id;
-    normalizedPunkScore['punk_id'] = punkScore.punk_id;
+    let normalizedratScore = {};
+    normalizedratScore['id'] = ratScore.id;
+    normalizedratScore['rat_id'] = ratScore.rat_id;
     
     for (let i = 0; i < traitTypeMeanRarity.length; i++) {
         let a = 0;
@@ -134,7 +134,7 @@ punkScores.forEach(punkScore => {
         }
 
         let c = traitTypeValueCount[i] >= meanValueCount ? 1 - b : 1 + b;
-        let r = (i == traitTypeMeanRarity.length - 1) ? punkScore['trait_count_rarity'] : punkScore['trait_type_' + i + '_rarity'];
+        let r = (i == traitTypeMeanRarity.length - 1) ? ratScore['trait_count_rarity'] : ratScore['trait_type_' + i + '_rarity'];
         let rarity_score_normalized = 0;
 
         if (a >= b && ((traitTypeMeanRarity[i] > meanRarity && traitTypeValueCount[i] > meanValueCount) || (traitTypeMeanRarity[i] < meanRarity && traitTypeValueCount[i] < meanValueCount))) {
@@ -148,41 +148,41 @@ punkScores.forEach(punkScore => {
         //console.log(rarity_score_normalized);
 
         if ((i == traitTypeMeanRarity.length - 1)) {
-            normalizedPunkScore['trait_count'] = punkScore['trait_count'];
-            normalizedPunkScore['trait_count_percentile'] = punkScore['trait_count_percentile'];
-            normalizedPunkScore['trait_count_rarity'] = rarity_score_normalized;
+            normalizedratScore['trait_count'] = ratScore['trait_count'];
+            normalizedratScore['trait_count_percentile'] = ratScore['trait_count_percentile'];
+            normalizedratScore['trait_count_rarity'] = rarity_score_normalized;
             raritySum = raritySum + rarity_score_normalized;
-            normalizedPunkScore['rarity_sum'] = raritySum;
-            normalizedPunkScore['rarity_rank'] = 0;
+            normalizedratScore['rarity_sum'] = raritySum;
+            normalizedratScore['rarity_rank'] = 0;
         } else {
-            if (!ignoreTraits.includes(punkScore['trait_type_' + i + '_value'].toLowerCase())) {
-                normalizedPunkScore['trait_type_' + i + '_percentile'] = punkScore['trait_type_' + i + '_percentile'];
-                normalizedPunkScore['trait_type_' + i + '_rarity'] = rarity_score_normalized;
+            if (!ignoreTraits.includes(ratScore['trait_type_' + i + '_value'].toLowerCase())) {
+                normalizedratScore['trait_type_' + i + '_percentile'] = ratScore['trait_type_' + i + '_percentile'];
+                normalizedratScore['trait_type_' + i + '_rarity'] = rarity_score_normalized;
                 raritySum = raritySum + rarity_score_normalized;
             } else {
-                normalizedPunkScore['trait_type_' + i + '_percentile'] = 0;
-                normalizedPunkScore['trait_type_' + i + '_rarity'] = 0;
+                normalizedratScore['trait_type_' + i + '_percentile'] = 0;
+                normalizedratScore['trait_type_' + i + '_rarity'] = 0;
                 raritySum = raritySum + 0;
             }
-            normalizedPunkScore['trait_type_' + i + '_value'] = punkScore['trait_type_' + i + '_value'];
+            normalizedratScore['trait_type_' + i + '_value'] = ratScore['trait_type_' + i + '_value'];
         }
     }
 
-    //console.log(normalizedPunkScore);
+    //console.log(normalizedratScore);
 
-    insertPunkScoreStmt.run(normalizedPunkScore);
+    insertratScoreStmt.run(normalizedratScore);
 });
 
-const punkScoreStmt = db.prepare('SELECT rarity_sum FROM normalized_punk_scores WHERE punk_id = ?');
-const punkRankStmt = db.prepare('SELECT COUNT(id) as higherRank FROM normalized_punk_scores WHERE rarity_sum > ?');
-let updatPunkRankStmt = db.prepare("UPDATE normalized_punk_scores SET rarity_rank = :rarity_rank WHERE punk_id = :punk_id");
+const ratScoreStmt = db.prepare('SELECT rarity_sum FROM normalized_rat_scores WHERE rat_id = ?');
+const ratRankStmt = db.prepare('SELECT COUNT(id) as higherRank FROM normalized_rat_scores WHERE rarity_sum > ?');
+let updatratRankStmt = db.prepare("UPDATE normalized_rat_scores SET rarity_rank = :rarity_rank WHERE rat_id = :rat_id");
 
-punkScores.forEach(punkScore => {
-    console.log("Normalized ranking punk: #" + punkScore.punk_id);
-    let normalizedPunkScore = punkScoreStmt.get(punkScore.punk_id);
-    let punkRank = punkRankStmt.get(normalizedPunkScore.rarity_sum);
-    updatPunkRankStmt.run({
-        rarity_rank: punkRank.higherRank+1,
-        punk_id: punkScore.punk_id
+ratScores.forEach(ratScore => {
+    console.log("Normalized ranking rat: #" + ratScore.rat_id);
+    let normalizedratScore = ratScoreStmt.get(ratScore.rat_id);
+    let ratRank = ratRankStmt.get(normalizedratScore.rarity_sum);
+    updatratRankStmt.run({
+        rarity_rank: ratRank.higherRank+1,
+        rat_id: ratScore.rat_id
     });
 });

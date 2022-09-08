@@ -12,31 +12,31 @@ if (!fs.existsSync(databasePath)) {
 
 const db = new Database(databasePath);
 
-exports.punk = function (punk, scoreTable) {
-  let punkId = punk.id;
-  let punkTraits = db.prepare('SELECT punk_traits.trait_type_id, trait_types.trait_type, punk_traits.value  FROM punk_traits INNER JOIN trait_types ON (punk_traits.trait_type_id = trait_types.id) WHERE punk_traits.punk_id = ?').all(punkId);
-  let punkScore = db.prepare('SELECT '+scoreTable+'.* FROM '+scoreTable+' WHERE '+scoreTable+'.punk_id = ?').get(punkId);
+exports.rat = function (rat, scoreTable) {
+  let ratId = rat.id;
+  let ratTraits = db.prepare('SELECT rat_traits.trait_type_id, trait_types.trait_type, rat_traits.value  FROM rat_traits INNER JOIN trait_types ON (rat_traits.trait_type_id = trait_types.id) WHERE rat_traits.rat_id = ?').all(ratId);
+  let ratScore = db.prepare('SELECT '+scoreTable+'.* FROM '+scoreTable+' WHERE '+scoreTable+'.rat_id = ?').get(ratId);
   let allTraitTypes = db.prepare('SELECT trait_types.* FROM trait_types').all();
-  
-  let punkTraitsData = [];
-  let punkTraitIDs = [];
-  punkTraits.forEach(punkTrait => {
-    let percentile = punkScore['trait_type_'+punkTrait.trait_type_id+'_percentile'];
-    let rarity_score = punkScore['trait_type_'+punkTrait.trait_type_id+'_rarity'];
-    punkTraitsData.push({
-      trait_type: punkTrait.trait_type,
-      value: punkTrait.value,
+
+  let ratTraitsData = [];
+  let ratTraitIDs = [];
+  ratTraits.forEach(ratTrait => {
+    let percentile = ratScore['trait_type_'+ratTrait.trait_type_id+'_percentile'];
+    let rarity_score = ratScore['trait_type_'+ratTrait.trait_type_id+'_rarity'];
+    ratTraitsData.push({
+      trait_type: ratTrait.trait_type,
+      value: ratTrait.value,
       percentile: percentile,
       rarity_score: rarity_score,
     });
-    punkTraitIDs.push(punkTrait.trait_type_id);
+    ratTraitIDs.push(ratTrait.trait_type_id);
   });
 
   let missingTraitsData = [];
   allTraitTypes.forEach(traitType => {
-    if (!punkTraitIDs.includes(traitType.id)) {
-      let percentile = punkScore['trait_type_'+traitType.id+'_percentile'];
-      let rarity_score = punkScore['trait_type_'+traitType.id+'_rarity'];
+    if (!ratTraitIDs.includes(traitType.id)) {
+      let percentile = ratScore['trait_type_'+traitType.id+'_percentile'];
+      let rarity_score = ratScore['trait_type_'+traitType.id+'_rarity'];
       missingTraitsData.push({
         trait_type: traitType.trait_type,
         percentile: percentile,
@@ -46,17 +46,17 @@ exports.punk = function (punk, scoreTable) {
   });
 
   return {
-    id: punk.id,
-    name: punk.name,
-    image: punk.image,
-    attributes: punkTraitsData,
+    id: rat.id,
+    name: rat.name,
+    image: rat.image,
+    attributes: ratTraitsData,
     missing_traits: missingTraitsData,
     trait_count: {
-      count: punkScore.trait_count,
-      percentile: punkScore.trait_count_percentile,
-      rarity_score: punkScore.trait_count_rarity
+      count: ratScore.trait_count,
+      percentile: ratScore.trait_count_percentile,
+      rarity_score: ratScore.trait_count_rarity
     },
-    rarity_score: punkScore.rarity_sum,
-    rarity_rank: punkScore.rarity_rank
+    rarity_score: ratScore.rarity_sum,
+    rarity_rank: ratScore.rarity_rank
   };
 };

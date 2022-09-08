@@ -104,7 +104,7 @@ body {
 }
 
 /*
- * One Day Punks
+ * One Day rats
  */
 
 .brand, .brand:hover {
@@ -261,20 +261,20 @@ body {
   color: var(--white);
 }
 
-.punk-avatar {
+.rat-avatar {
   width: 100%;
   background-color: #000;
   border-radius: 100%;
   max-height: 280px;
 }
 
-.punk-info {
+.rat-info {
   position: relative;
   font-family: var(--font-family-title);
   font-weight: 700;
 }
 
-.punk-info svg {
+.rat-info svg {
   transition: all var(--speed);
   position: absolute;
   top: -10%;
@@ -286,46 +286,46 @@ body {
   vertical-align: middle;
 }
 
-.punk-info svg.shadow {
+.rat-info svg.shadow {
   margin-left: -.5rem;
   margin-top: .5rem;
 }
 
-a:hover .punk-info svg.shadow {
+a:hover .rat-info svg.shadow {
   margin-top: .325rem;
   margin-left: -.325rem;
   transform: rotate(-9deg) !important; 
 }
 
-a:hover .punk-info svg:not(.shadow) {
+a:hover .rat-info svg:not(.shadow) {
   margin-top: .125rem;
   margin-left: -.125rem;
   transform: rotate(9deg) !important; 
 }
 
-.punk-info span {
+.rat-info span {
   font-size: var(--font-size-md); 
   color: var(--white); 
   text-decoration: none;
 }
 
-.punk-description {
+.rat-description {
   line-height: 1.2rem;
 }
 
-.punk-description a {
+.rat-description a {
   text-decoration: none;
   color: var(--primary);
 }
 
-.punk-rank {
+.rat-rank {
   color: var(--white); 
   font-family: var(--font-family-title);
   font-weight: 700;
   font-size: var(--font-size-lg);
 }
 
-.punk-similar-score {
+.rat-similar-score {
   color: var(--white); 
   font-family: var(--font-family-title);
   font-weight: 700;

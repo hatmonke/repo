@@ -3,7 +3,7 @@ const config = require(appRoot + '/config/config.js');
 const fs = require('fs');
 const request = require('sync-request');
 
-const outputPath = appRoot + '/config/punkscape_collection.json';
+const outputPath = appRoot + '/config/ratscape_collection.json';
 
 let collectionData = [];
 let existItem = [];

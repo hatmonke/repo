@@ -17,7 +17,7 @@
     <div class="container d-flex w-100 p-3 mx-auto flex-column" style="min-height: 100%; max-width: 72em;">
       <%- include('./component/header'); -%>
       <main class="px-3" style="min-height: 100%;">
-        <h1 class="superbig upper text-center"><%= collection_name %></h1>
+        <h1 class="superbig upper text-center" style="color: goldenrod;"><%= collection_name %></h1>
         <form class="search text-center">
           <fieldset>
             <input class="search-text-input" type="text" name="search" placeholder="Search by ID..." value="<%= search %>">
@@ -68,12 +68,12 @@
                 <select name="trait_select_<%= trait.trait_type_id %>" class="trait-select form-select mb-4">
                   <option value="<%= trait.trait_type_id %>_All">All (<%= allTraitTypesData[trait.trait_type] %>)</option>
                   <option value="<%= trait.trait_type_id %>_None" <% if (selectedTraits.includes(trait.trait_type_id+'_None')) { %> selected <% } %> >None (<%= (totalSupply - allTraitTypesData[trait.trait_type]) %>)</option>
-                  <option value="<%= trait.trait_type_id %>_<%= trait.trait_detail_type %>" <% if (selectedTraits.includes(trait.trait_type_id+'_'+trait.trait_detail_type)) { %> selected <% } %> ><%= trait.trait_detail_type %> (<%= trait.punk_count %>)</option>
+                  <option value="<%= trait.trait_type_id %>_<%= trait.trait_detail_type %>" <% if (selectedTraits.includes(trait.trait_type_id+'_'+trait.trait_detail_type)) { %> selected <% } %> ><%= trait.trait_detail_type %> (<%= trait.rat_count %>)</option>
               <% 
                 currentTriat = trait.trait_type;
               } else {
               %>
-                  <option value="<%= trait.trait_type_id %>_<%= trait.trait_detail_type %>" <% if (selectedTraits.includes(trait.trait_type_id+'_'+trait.trait_detail_type)) { %> selected <% } %>><%= trait.trait_detail_type %> (<%= trait.punk_count %>)</option>
+                  <option value="<%= trait.trait_type_id %>_<%= trait.trait_detail_type %>" <% if (selectedTraits.includes(trait.trait_type_id+'_'+trait.trait_detail_type)) { %> selected <% } %>><%= trait.trait_detail_type %> (<%= trait.rat_count %>)</option>
               <%
               }
               %>
@@ -85,15 +85,12 @@
             <% } %>
           </div>
         </div>
-        <h3 class="mb-4">Total: <%= totalPunkCount %></h3>
-        <p style="line-height: var(--font-size-lg);">
-          Rankin Method: Rarity Score without Additional Weighting, exmple: <a style="text-decoration: none; color: var(--primary);" href="https://rarity.tools/boredapeyachtclub?method=score&normalize=off&uniqueness=off&weights=off&propWeights=%24Trait%2520Count%3A8%26Theme%2520Match%25201%3A0.075%26Theme%2520Match%25202%3A0.075" target="_blank">BAYC on rarity.tools</a>
-        </p>
-        <div class="row punks">
-          <% if (!_.isEmpty(punks)) { %>
-            <% punks.forEach(function(punk) { %>
+        <h3 class="mb-4">Total: <%= totalratCount %></h3>
+        <div class="row rats">
+          <% if (!_.isEmpty(rats)) { %>
+            <% rats.forEach(function(rat) { %>
               <div class="col-lg-3 col-md-4 col-sm-6 col-6 mb-5" style="padding-left: 30px; padding-right: 30px;">
-                <%- include('./component/punk', {punk: punk, trait_normalization: useTraitNormalization}); -%>
+                <%- include('./component/rat', {rat: rat, trait_normalization: useTraitNormalization}); -%>
               </div>
             <% }); %>
           <% } else { %>
